@@ -11,8 +11,8 @@ are foreground probabilities from the teacher and prior, respectively.
 
 | Manuscript experiment | Entry points and provenance |
 | --- | --- |
-| BUSI as source, TransUNet | [Core controlled training and BUS-BRA evaluation](transunet/repro_control_20261024/). The `exploratory_variants_20261108` subdirectory contains continuous agreement and foreground-floor variants. [External evaluation](transunet/external_control_20261106/), [external continuous agreement](transunet/external_soft_agreement_20261109/), [external foreground floor](transunet/external_soft_floor_20261109/), and the [BUS-UCLM control](transunet/uclm_control_20261110/) cover the other target configurations. |
-| BUS-BRA as source, TransUNet | [Four direction snapshots](transunet/birp_reverse_continuous_20261114/), including seed pilot wrappers and training templates from the Nov 14 handoff. |
+| BUSI as source, TransUNet | [Core controlled training and BUS-BRA evaluation](transunet/repro_control_20261024/). The `exploratory_variants_20261108` subdirectory contains continuous agreement and foreground-floor variants. [External evaluation](transunet/external_control_20261106/), [external continuous agreement](transunet/external_soft_agreement_20261109/), [external foreground floor](transunet/external_soft_floor_20261109/), and the [BUS-UCLM control](transunet/uclm_control_20261110/) cover the other target configurations. The `active_targets` and `active_target` subdirectories contain their deployed code and templates. |
+| BUS-BRA as source, TransUNet | [Four direction snapshots](transunet/birp_reverse_continuous_20261114/), including final seed-specific pilot wrappers, full-length source-only runners, and training templates retrieved from Jubail. |
 | BrEaST as source, TransUNet | The same controlled trainer and continuous wrapper under the separately accessed target partitions. [Per-seed summaries](results/available_run_metrics.json) give all three reported directions. |
 | BrEaST as source and component ablation, U-Net | [Early U-Net trainer and data helpers](unet/reference_20261021/). [Per-seed summaries](results/available_run_metrics.json) save the reported later configuration and the final EMA Dice. See the inventory below for source coverage. |
 
@@ -50,14 +50,16 @@ the BUSI-, BUS-BRA-, and BrEaST-source protocols use different test partitions.
 
 Run `python3 tools/aggregate_results.py` to reproduce the means and sample
 standard deviations for the runs in the bundled numeric record. The record
-includes the BUS-BRA-source and BrEaST-source TransUNet runs, the U-Net
-BrEaST-source runs and the U-Net component ablation. The reported BUSI-source
-TransUNet table comes from the controlled manuscript record.
+contains 207 runs spanning the BUSI-, BUS-BRA-, and BrEaST-source TransUNet
+experiments, the U-Net BrEaST-source runs, and the U-Net component ablation.
+All 16 BUSI-source Dice entries were checked against the original per-seed
+Jubail evaluation summaries.
 
 ## Source coverage
 
-The TransUNet files are historical snapshots from the prior manuscript and
-collaboration handoff. The Oct 21 U-Net code predates the final continuous
+The TransUNet files come from the manuscript handoff and the corresponding
+Jubail execution directories. The [method diagram](figures/continuous_agreement_graph.tex)
+is the source used to build the manuscript figure. The Oct 21 U-Net code predates the final continuous
 modes. The exact later U-Net training revision, some BrEaST-source
 orchestration scripts, and the qualitative panel generation script have yet
 to be recovered into this package. Their reported outputs are identified by

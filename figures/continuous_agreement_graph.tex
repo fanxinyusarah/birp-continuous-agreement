@@ -1,0 +1,64 @@
+\begin{tikzpicture}[
+  font=\sffamily,
+  >={Stealth[round,length=2.4mm,width=2.0mm]},
+  panel/.style={draw=black!55, line width=.75pt, rounded corners=4pt,
+    align=center, minimum height=12mm, inner sep=6pt, text=black!85,
+    font=\sffamily\small},
+  flow/.style={-> , draw=black!55, line width=.95pt, rounded corners=4pt},
+  updatearrow/.style={-> , draw=updateclr!85!black, line width=.95pt, dashed, rounded corners=4pt},
+  lane/.style={rounded corners=6pt, draw=none},
+  collabel/.style={font=\sffamily\bfseries\small, text=black!70},
+  smalllabel/.style={font=\sffamily\scriptsize, text=black!60, align=center}]
+
+\definecolor{inputclr}{HTML}{64748B}
+\definecolor{teacherclr}{HTML}{2563EB}
+\definecolor{priorclr}{HTML}{0D9488}
+\definecolor{studentclr}{HTML}{2563EB}
+\definecolor{weightclr}{HTML}{7C3AED}
+\definecolor{lossclr}{HTML}{D97706}
+\definecolor{updateclr}{HTML}{DC2626}
+
+% ---- soft column background lanes ----
+\fill[lane, fill=black!3]    (-1.55,-3.55) rectangle ( 1.55, 2.65);
+\fill[lane, fill=blue!4]     ( 2.55,-3.55) rectangle ( 5.95, 2.65);
+\fill[lane, fill=violet!5]   ( 6.55,-3.55) rectangle (11.45, 2.65);
+\fill[lane, fill=orange!5]   (12.0,-3.55) rectangle (15.2, 2.65);
+
+% ---- column headers + thin rule ----
+\node[collabel] at (0,2.95)    {INPUT};
+\node[collabel] at (4.25,2.95) {PREDICTIONS};
+\node[collabel] at (9,2.95)    {PIXEL WEIGHT};
+\node[collabel] at (13.6,2.95) {TARGET SUPERVISION};
+\draw[draw=black!20, line width=.5pt] (-1.55,2.6) -- (1.55,2.6);
+\draw[draw=black!20, line width=.5pt] (2.55,2.6) -- (5.95,2.6);
+\draw[draw=black!20, line width=.5pt] (6.55,2.6) -- (11.45,2.6);
+\draw[draw=black!20, line width=.5pt] (12.0,2.6) -- (15.2,2.6);
+
+% ---- nodes ----
+\node[panel, draw=inputclr, fill=inputclr!10, minimum width=2.3cm]
+  (target) at (0,0) {Target image\\[1pt]$x_t$ (unlabeled)};
+\node[panel, draw=teacherclr, fill=teacherclr!9, minimum width=2.9cm]
+  (teacher) at (4.25,2) {EMA teacher\\[1pt]probability $p$};
+\node[panel, draw=priorclr, fill=priorclr!11, minimum width=2.9cm]
+  (prior) at (4.25,0) {Frozen AutoSAMUS\\[1pt]probability $q$};
+\node[panel, draw=studentclr, fill=studentclr!6, minimum width=2.9cm]
+  (student) at (4.25,-2.05) {Student network\\[1pt]target prediction};
+\node[panel, draw=weightclr, line width=1.15pt, fill=weightclr!8, minimum width=4.5cm]
+  (weight) at (9,0) {\textbf{Continuous agreement weight}\\[2pt]$w=0.5+0.5\,[2|q-0.5|]\,[1-|p-q|]$};
+\node[panel, draw=lossclr, fill=lossclr!11, minimum width=3.2cm]
+  (loss) at (13.6,-1) {Weighted target loss\\[1pt]CE + Dice};
+
+% ---- flows (same routing as the original, restyled) ----
+\draw[flow] (target.east) -- ++(.5,0) |- (teacher.west);
+\draw[flow] (target) -- (prior);
+\draw[flow] (target.east) -- ++(.5,0) |- (student.west);
+\draw[flow] (teacher.east) -- ++(.4,0) |- (weight.west);
+\draw[flow] (prior) -- (weight);
+\draw[flow] (weight.east) -| node[pos=.15, above, smalllabel] {$w$} (loss.north);
+\draw[flow] (student.east) -- ++(.5,0) |- (loss.west);
+\draw[flow] (teacher.east) -- ++(.8,0) -- node[above, smalllabel] {$\hat y=\mathbf{1}[p\geq0.5]$} (13.6,2) -- (loss.north);
+\draw[updatearrow] (student.south) -- ++(0,-.55) -| node[pos=.15, below, smalllabel, text=updateclr!70!black] {EMA update} (2.35,2) -- (teacher.west);
+
+% ---- footnote ----
+\node[smalllabel] at (9,-3.25) {Source labels supervise the student separately; the foundation prior is frozen.};
+\end{tikzpicture}
