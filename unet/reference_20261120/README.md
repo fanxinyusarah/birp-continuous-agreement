@@ -31,5 +31,9 @@ backbone (U-Net+ResNet50 vs. TransUNet), different data format (local
 `.npz` packs vs. the original account's image/label directories), different
 AutoSAMUS checkpoint (a separately-trained copy on this account, not the one
 under `transunet/`). Its numbers must not be pooled with the `transunet/`
-results -- see the manuscript's Table 2 vs. Tables 1/3 for the same caveat
-in context.
+results. The final manuscript reports these separately, in Table 4 and Appendix A.
+Evaluation averages the model predictions from the original image and its
+horizontal flip. It does not load or run AutoSAMUS at inference time.
+The archived `predict()` helper calls `model.train()` after evaluation,
+including when invoked for the EMA teacher during training. This preserves
+the behavior of this snapshot for comparison with the archived results.

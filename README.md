@@ -2,7 +2,7 @@
 
 Research code and experiment records for *Continuous Foundation-Guided
 Pseudo-Label Weighting for Breast Ultrasound Domain Adaptation* by Xinyu Fan
-and Xinyi Li. The student learns from the EMA teacher's binary pseudo-labels.
+and Xinyi Li ([arXiv:2611.33843](https://arxiv.org/abs/2611.33843)). The student learns from the EMA teacher's binary pseudo-labels.
 A frozen AutoSAMUS prior contributes the pixel weight
 `w = 0.5 + 0.5 * (2 * abs(q - 0.5)) * (1 - abs(p - q))`, where `p` and `q`
 are foreground probabilities from the teacher and prior, respectively.
@@ -15,7 +15,10 @@ are foreground probabilities from the teacher and prior, respectively.
 | BUS-BRA as source, TransUNet | [Four direction snapshots](transunet/birp_reverse_continuous_20261114/), including final seed-specific pilot wrappers, full-length source-only runners, and training templates retrieved from Jubail. |
 | BrEaST as source, TransUNet | The same controlled trainer and continuous wrapper under the separately accessed target partitions ([orchestration code, run under the second account](transunet/breast_source_own_account_20261117/)). [Per-seed summaries](results/available_run_metrics.json) give all three reported directions (BUSI, BUS-UCLM, OASBUD). |
 | BrEaST as source and component ablation, U-Net | [Final U-Net trainer and data helpers](unet/reference_20261120/), including the `cont_full`/`cont_cert`/`cont_agree` modes and the BrEaST source domain ([`reference_20261021`](unet/reference_20261021/) is the earlier snapshot, kept for history). [Per-seed summaries](results/available_run_metrics.json) give the reported configuration and the final EMA Dice, including the certainty/agreement-only ablation and the prior-checkpoint and no-pretraining swaps used to narrow the BrEaST→BUS-UCLM cross-pipeline discrepancy. |
-| Qualitative figures | [Panel generation script](tools/generate_qualitative_figures.py) ([Slurm wrapper](tools/generate_qualitative_figures.sbatch)): loads the seed-1337 TransUNet checkpoints for BrEaST→BUSI/BUS-UCLM, recomputes the frozen prior live on the held-out test images (the cached prior only covers the adaptation split, not the test split -- reusing it would silently show the wrong image), and picks the largest-gain, median-gain and largest-loss cases by `cont_full` Dice minus the best baseline's Dice, per image. |
+| Qualitative figures | [Panel generation script](tools/generate_qualitative_figures.py) ([Slurm wrapper](tools/generate_qualitative_figures.sbatch)): loads the seed-1337 TransUNet checkpoints for BrEaST→BUSI/BUS-UCLM, recomputes the frozen prior on the held-out test images because the cache covers only the adaptation split, and picks the largest-gain, median-gain and largest-loss cases by `cont_full` Dice minus the best baseline's Dice, per image. |
+
+Submit the qualitative Slurm wrapper from the repository root. Set
+`BIRP_FIGURE_SCRIPT` to the script's absolute path when submitting elsewhere.
 
 The historical Python and Slurm files retain the original run layout. Build a
 separate working copy for each target. Replace cluster-specific paths and
@@ -43,7 +46,8 @@ the BUSI-, BUS-BRA-, and BrEaST-source protocols use different test partitions.
    cache, software and input verification.
 4. Run the protocol's held-out evaluator after training. TransUNet evaluates
    the EMA weights at the student's source-validation-selected checkpoint.
-   The U-Net summaries report the final-iteration EMA test mean.
+   The U-Net summaries report the final-iteration EMA test mean, with
+   horizontal-flip test-time augmentation.
    The TransUNet boundary evaluator uses the image diagonal for exactly one
    empty mask and zero for two empty masks.
 
@@ -69,7 +73,13 @@ seed in the numeric record. Exact reproduction of all runs also requires the
 corresponding split manifests and pretrained checkpoints. Training on GPU has
 not been rerun for this archive.
 
-The legacy TransUNet and AutoSAMUS source trees retain the upstream notices
-where supplied. Third-party model code and weights are subject to their
-respective terms. See [AutoSAMUS](https://github.com/xianlin7/AutoSAMUS) and
-[TransUNet](https://github.com/Beckschen/TransUNet).
+## Third-party code
+
+- The archived `legacy/networks/vit_seg_*` files include [TransUNet](https://github.com/Beckschen/TransUNet)
+  code under [Apache 2.0](transunet/LICENSE.TransUNet).
+- The archived AutoSAMUS tree includes [SAMUS and AutoSAMUS](https://github.com/xianlin7/SAMUS)
+  code under the [upstream MIT license](third_party/AutoSAMUS/SAMUS_For_3D/LICENSE.SAMUS)
+  and [Segment Anything](https://github.com/facebookresearch/segment-anything)-derived
+  code under [Apache 2.0](third_party/AutoSAMUS/SAMUS_For_3D/LICENSE).
+  The archived `utils/config.py` and `utils/evaluation.py` contain downstream
+  changes, and `utils/data_abus.py` is an additional ABUS loader in this snapshot.
